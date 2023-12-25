@@ -6,39 +6,24 @@
 
 extern char **environ;
 
-int main() {
-    char command[100];
+int main(int argc, char *argv[]) {
+    char *command = NULL;
+    size_t len = 0;
+    ssize_t read;
+
     pid_t pid;
-    char *token;
-    char *args[11];
-    int arg_count;
+    int i;
 
     while (1) {
         write(STDOUT_FILENO, "#cisfun$ ", 9);
 
-        fgets(command, 100, stdin);
-
-        if (feof(stdin)) {
+        if ((read = getline(&command, &len, stdin)) == -1) {
             break;
         }
 
-        command[strcspn(command, "\n")] = '\0';
-
-        arg_count = 0;
-        token = strtok(command, " ");
-
-        while (token != NULL) {
-            args[arg_count++] = token;
-
-            if (arg_count == 10) {
-                fprintf(stderr, "Exceeded maximum number of arguments\n");
-                exit(1);
-            }
-
-            token = strtok(NULL, " ");
+        if (command[read - 1] == '\n') {
+            command[read - 1] = '\0';
         }
-
-        args[arg_count] = NULL;
 
         pid = fork();
 
@@ -46,13 +31,30 @@ int main() {
             perror("fork");
             exit(1);
         } else if (pid == 0) {
+            char **args = (char **)malloc((argc + 1) * sizeof(char *));
+
+            if (args == NULL) {
+                perror("malloc");
+                exit(1);
+            }
+
+            args[0] = command;
+
+            for (i = 1; i < argc; i++) {
+                args[i] = argv[i];
+            }
+
+            args[argc] = NULL;
+
             execve(args[0], args, environ);
             perror(args[0]);
+            free(args);
             exit(1);
         } else {
             wait(NULL);
         }
     }
 
+    free(command);
     return 0;
 }

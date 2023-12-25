@@ -7,19 +7,22 @@
 extern char **environ;
 
 int main() {
-    char command[100];
+    char *command = NULL;
+    size_t len = 0;
+    ssize_t read;
+
     pid_t pid;
 
     while (1) {
         write(STDOUT_FILENO, "#cisfun$ ", 9);
 
-        fgets(command, 100, stdin);
-
-        if (feof(stdin)) {
+        if ((read = getline(&command, &len, stdin)) == -1) {
             break;
         }
 
-        command[strcspn(command, "\n")] = '\0';
+        if (command[read - 1] == '\n') {
+            command[read - 1] = '\0';
+        }
 
         pid = fork();
 
@@ -27,9 +30,8 @@ int main() {
             perror("fork");
             exit(1);
         } else if (pid == 0) {
-            /* Create a modifiable copy of command for argv */
             char *argv[2];
-            argv[0] = strdup(command);  
+            argv[0] = command;  
             argv[1] = NULL; 
 
             execve(argv[0], argv, environ);
@@ -40,5 +42,6 @@ int main() {
         }
     }
 
+    free(command); 
     return 0;
 }
