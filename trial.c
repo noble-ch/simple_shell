@@ -36,7 +36,23 @@ char* get_user_input(void)
     return (input);
 }
 
-void execute_command(char* command)
+void parse_command(char* command, char** args)
+{
+    char* token;
+    int index = 0;
+
+    token = strtok(command, " ");
+    args[index++] = token;
+
+    while (token != NULL && index < MAX_ARGS - 1)
+    {
+        token = strtok(NULL, " ");
+        args[index++] = token;
+    }
+    args[index] = NULL;
+}
+
+void execute_command(char** args)
 {
     pid_t pid = fork();
 
@@ -47,23 +63,11 @@ void execute_command(char* command)
     }
     else if (pid == 0)
     {
-        char** args = (char**)malloc(2 * sizeof(char*));
-
-        if (args == NULL)
+        if (execvp(args[0], args) == -1)
         {
-            handle_errors("malloc error");
+            perror("execvp error");
             exit(1);
         }
-
-        args[0] = command;
-        args[1] = NULL;
-
-        if (execve(args[0], args, NULL) == -1)
-        {
-            perror("execve error");
-            exit(1);
-        }
-        free(args);
     }
     else
     {
