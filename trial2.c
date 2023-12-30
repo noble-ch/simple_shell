@@ -89,3 +89,27 @@ ssize_t custom_getline(char **lineptr, size_t *n, FILE *stream)
     (*lineptr)[len] = '\0';
     return (len);
 }
+
+void change_directory(const char *new_directory)
+{
+    char current_directory[BUFFER_SIZE];
+    if (getcwd(current_directory, sizeof(current_directory)) == NULL)
+    {
+        perror("getcwd() error");
+    }
+    else
+    {
+        if (new_directory == NULL || strlen(new_directory) == 0)
+        {
+            new_directory = getenv("HOME");
+        }
+        if (chdir(new_directory) == 0)
+        {
+            setenv("PWD", new_directory, 1);
+        }
+        else
+        {
+            perror("chdir() error");
+        }
+    }
+}

@@ -6,6 +6,15 @@
 #define BUFFER_SIZE 1024
 #define MAX_ARGS 10
 #define PATH_MAX_LEN 4096
+#define MAX_ALIASES 50
+#define MAX_ALIAS_NAME 50
+#define MAX_ALIAS_VALUE 100
+
+typedef struct
+{
+    char name[MAX_ALIAS_NAME];
+    char value[MAX_ALIAS_VALUE];
+} Alias;
 
 extern char **environ;
 
@@ -17,5 +26,11 @@ void parse_command(char* command, char** args);
 int check_command_existence(char *command);
 void print_environment(void);
 ssize_t custom_getline(char **lineptr, size_t *n, FILE *stream);
+void change_directory(const char *new_directory);
+void handle_commands(char *commands);
+void handle_command(char **args);
+void print_aliases();
+void print_alias(const char *name);
+void define_alias(const char *name, const char *value);
 
 #endif /* MAIN_H */

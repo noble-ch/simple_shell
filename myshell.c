@@ -9,7 +9,6 @@ int main(void)
 {
     char *command;
     size_t bufsize = BUFFER_SIZE;
-    char* args[MAX_ARGS];
 
     command = (char*)malloc(bufsize * sizeof(char));
 
@@ -28,27 +27,10 @@ int main(void)
             break;
         }
 
-        if (command[strlen(command) - 1] == '\n')
-            command[strlen(command) - 1] == '\0';
-
-        parse_command(command, args);
-
-        if (strcmp(args[0], "exit") == 0)
-        {
-            printf("Exiting the shell\n");
-            break;
-        }
-        else if(strcmp(args[0], "env") == 0)
-        {
-            print_environment();
-        }
-
-        if (!check_command_existence(args[0]))
-        {
-            printf("Command not found: %s\n", args[0]);
+        if (strlen(command) == 0)
             continue;
-        }
-        execute_command(args);
+
+        handle_commands(command);
     }
     free(command);
     return (0);

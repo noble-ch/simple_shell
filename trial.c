@@ -59,18 +59,19 @@ void execute_command(char** args)
     if (pid == -1)
     {
         handle_errors("fork error");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     else if (pid == 0)
     {
         if (execvp(args[0], args) == -1)
         {
-            perror("execvp error");
+            fprintf(stderr, "Cmd not found: %s\n", args[0]);
             exit(1);
         }
     }
     else
     {
-        wait(NULL);
+        int status;
+        waitpid(pid, &status, 0);
     }
 }
