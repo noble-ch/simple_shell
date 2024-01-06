@@ -77,7 +77,7 @@ int main(void)
                     perror("getcwd error");
                 }
             }
-            continue; // Skip fork-exec for cd command
+            continue;
         }
 
         pid = fork();
