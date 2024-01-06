@@ -2,30 +2,116 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
+int last_command_exit_status = 0;
+
+char* replace_str(char* str, const char* find, const char* replace)
+{
+    char* result;
+    char* ins;
+    char* tmp;
+    size_t len_find;
+
+    len_find = strlen(find);
+    ins = str;
+
+    size_t count = 0;
+    while ((tmp = strstr(ins, find)) != NULL)
+    {
+        ins = tmp + len_find;
+        count++;
+    }
+
+    result = (char*)malloc(strlen(str) + (strlen(replace) - len_find) * count + 1);
+
+    if (result == NULL)
+    {
+        fprintf(stderr, "Memory allocation error\n");
+        exit(EXIT_FAILURE);
+    }
+
+    *result = '\0';
+
+    ins = str;
+    while (count--)
+    {
+        tmp = strstr(ins, find);
+        size_t len = tmp - ins;
+        strncat(result, ins, len);
+        strcat(result, replace);
+        ins = tmp + len_find;
+    }
+    strcat(result, ins);
+    return (result);
+}
+
+char* replace_variables(char* command)
+{
+    char* result = strdup(command);
+    char* pos = strstr(result, "$?");
+    if (pos != NULL)
+    {
+        char status_str[10];
+        snprintf(status_str, sizeof(status_str), "%d", last_command_exit_status);
+        free(result);
+        result = replace_str(command, "$?", status_str);
+    }
+
+    pos = strstr(result, "$$");
+    if (pos != NULL)
+    {
+        char pid_str[10];
+        snprintf(pid_str, sizeof(pid_str), "%d", getpid());
+        free(result);
+        result = replace_str(command, "$$", pid_str);
+    }
+
+    return result;
+}
 
 void handle_commands(char *commands)
 {
     char *token = strtok(commands, ";");
     while (token != NULL)
     {
+        if (token[0] == '#')
+            break;
         if (token[strlen(token) - 1] == '\n')
-            token[strlen(token) - 1] == '\0';
+            token[strlen(token) - 1] = '\0';
 
-        char *args[MAX_ARGS];
-        parse_command(token, args);
-        handle_command(args);
+        char *processed_token = replace_variables(token);
+        char* args[MAX_ARGS];
+        parse_command(processed_token, args);
+        int status = handle_command(args);
+        free(processed_token);
+
+        char* logical_op = strstr(token, "&&");
+        if (logical_op != NULL)
+        {
+            if (last_command_exit_status != 0)
+                break;
+        }
+        else
+        {
+            logical_op = strstr(token, "||");
+            if (logical_op != NULL && last_command_exit_status == 0)
+                break;
+        }
+
         token = strtok(NULL, ";");
     }
 }
 
-void handle_command(char **args)
+int handle_command(char **args)
 {
+    int status = 0;
+
     if (strcmp(args[0], "exit") == 0)
     {
         if (args[1] != NULL)
         {
-            int status = atoi(args[1]);
+            status = atoi(args[1]);
             printf("Exiting the shell with status code: %d\n", status);
             exit(status);
         }
@@ -101,7 +187,9 @@ void handle_command(char **args)
         if (!check_command_existence(args[0]))
         {
             printf("Command not found: %s\n", args[0]);
+            status = 1;
         }
         execute_command(args);
     }
+    return status;
 }

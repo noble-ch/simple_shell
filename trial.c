@@ -50,6 +50,12 @@ void parse_command(char* command, char** args)
         args[index++] = token;
     }
     args[index] = NULL;
+
+    if (index >= MAX_ARGS - 1)
+    {
+        fprintf(stderr, "Too many arguments. Increase MAX_ARGS.\n");
+        exit(EXIT_FAILURE);
+    }
 }
 
 void execute_command(char** args)

@@ -28,9 +28,11 @@ void print_environment(void);
 ssize_t custom_getline(char **lineptr, size_t *n, FILE *stream);
 void change_directory(const char *new_directory);
 void handle_commands(char *commands);
-void handle_command(char **args);
+int handle_command(char **args);
 void print_aliases();
 void print_alias(const char *name);
 void define_alias(const char *name, const char *value);
+char* replace_variables(char* command);
+char* replace_str(char* str, const char* find, const char* replace);
 
 #endif /* MAIN_H */
