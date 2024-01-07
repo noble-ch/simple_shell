@@ -9,15 +9,15 @@
  * main - Entry point for the shell program
  * @argc: The number of command line arguments
  * @argv: An array of command-line strings.
- * 
+ *
  * Description: The main function of the shell program. It reads
  * commands from either a file or standard input, processes the
  * commands, and executes them. If a file name is provided as a
  * command-line argument, the program reads commands from the file;
  * otherwise, it reads commands from standard input.
- * 
+ *
  * Return: Always returns 0 to indicate successful execution/
-*/
+ */
 
 int main(int argc, char *argv[])
 {
@@ -40,13 +40,13 @@ int main(int argc, char *argv[])
             exit(EXIT_FAILURE);
         }
 
-        command = (char*)malloc(bufsize * sizeof(char));
+        command = (char *)malloc(bufsize * sizeof(char));
         if (command == NULL)
         {
             handle_errors("malloc error");
             exit(EXIT_FAILURE);
         }
-        
+
         while (custom_getline(&command, &bufsize, file) == -1)
         {
             if (strlen(command) > 0)
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
         return (0);
     }
 
-    command = (char*)malloc(bufsize * sizeof(char));
+    command = (char *)malloc(bufsize * sizeof(char));
 
     if (command == NULL)
     {

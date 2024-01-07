@@ -8,7 +8,7 @@
 
 /**
  * display_prompt - Displays the shell prompt
-*/
+ */
 void display_prompt(void)
 {
     printf("#cisfun$ ");
@@ -17,22 +17,21 @@ void display_prompt(void)
 /**
  * handle_errors - Handles errors and prints an error message
  * @message: The error message to be displayed
-*/
-void handle_errors(const char* message)
+ */
+void handle_errors(const char *message)
 {
     perror(message);
 }
 
 /**
  * get_user_input - Reads user input from stdin
- * 
+ *
  * Return: A pointer to the user input string, or NULL on failure
-*/
-char* get_user_input(void)
+ */
+char *get_user_input(void)
 {
-    char* input = NULL;
+    char *input = NULL;
     size_t bufsize = 0;
-
 
     if (getline(&input, &bufsize, stdin) == -1)
     {
@@ -52,34 +51,59 @@ char* get_user_input(void)
  * parse_command - Parses the command string into separate arguments
  * @command: The command string to be parsed
  * @args: An array to store the parsed arguments
-*/
-void parse_command(char* command, char** args)
+ */
+void parse_command(char *command, char **args)
 {
-    char* token;
     int index = 0;
+    int in_arg = 0;
 
-    token = strtok(command, " ");
-    args[index++] = token;
-
-    while (token != NULL && index < MAX_ARGS - 1)
+    while (*command != '\0')
     {
-        token = strtok(NULL, " ");
-        args[index++] = token;
+        /*Skip leading spaces or tabs*/
+        while (*command == ' ' || *command == '\t')
+            command++;
+
+        /*Check if it's the end of the string*/
+        if (*command == '\0')
+            break;
+
+        in_arg = 1;
+
+        /*Store the argument if it's within the limits*/
+        if (index < MAX_ARGS - 1)
+        {
+            args[index++] = command;
+
+            /*Find the end of the argument*/
+            while (*command != '\0' && *command != ' ' && *command != '\t')
+                command++;
+
+            if (*command != '\0')
+            {
+                *command = '\0'; /*Null-terminate the argument*/
+                command++;
+            }
+        }
+        else
+        {
+            fprintf(stderr, "Too many arguments. Increase MAX_ARGS.\n");
+            exit(EXIT_FAILURE);
+        }
     }
+
     args[index] = NULL;
 
-    if (index >= MAX_ARGS - 1)
+    if (in_arg && index >= MAX_ARGS - 1)
     {
         fprintf(stderr, "Too many arguments. Increase MAX_ARGS.\n");
         exit(EXIT_FAILURE);
     }
 }
-
 /**
  * execute_command - Executes a command with its arguments
  * @args: An array containing the command and its arguments
-*/
-void execute_command(char** args)
+ */
+void execute_command(char **args)
 {
     pid_t pid = fork();
 

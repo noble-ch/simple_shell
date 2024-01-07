@@ -11,27 +11,29 @@ int last_command_exit_status = 0;
  * @str: The original string
  * @find: The substring to find and replace
  * @replace: The replacement substring
- * 
+ *
  * Return: A new string with all occurrences of @find replaced by @replace
-*/
-char* replace_str(char* str, const char* find, const char* replace)
+ */
+
+size_t count = 0;
+size_t len_find;
+
+char *replace_str(char *str, const char *find, const char *replace)
 {
-    char* result;
-    char* ins;
-    char* tmp;
-    size_t len_find;
+    char *result;
+    char *ins;
+    char *tmp;
 
     len_find = strlen(find);
     ins = str;
 
-    size_t count = 0;
     while ((tmp = strstr(ins, find)) != NULL)
     {
         ins = tmp + len_find;
         count++;
     }
 
-    result = (char*)malloc(strlen(str) + (strlen(replace) - len_find) * count + 1);
+    result = (char *)malloc(strlen(str) + (strlen(replace) - len_find) * count + 1);
 
     if (result == NULL)
     {
@@ -57,13 +59,13 @@ char* replace_str(char* str, const char* find, const char* replace)
 /**
  * replace_variables - Replace special variables in the command string
  * @command: The command string
- * 
+ *
  * Return: A new string with special variables replaced
-*/
-char* replace_variables(char* command)
+ */
+char *replace_variables(char *command)
 {
-    char* result = strdup(command);
-    char* pos = strstr(result, "$?");
+    char *result = strdup(command);
+    char *pos = strstr(result, "$?");
     if (pos != NULL)
     {
         char status_str[10];
@@ -87,46 +89,94 @@ char* replace_variables(char* command)
 /**
  * handle_commands - Handle multiple commands separated by logical operators
  * @commands: The input commands string
-*/
+ */
 void handle_commands(char *commands)
 {
-    char *token = strtok(commands, ";");
-    while (token != NULL)
+    char *pos = commands;
+
+    while (*pos != '\0')
     {
-        if (token[0] == '#')
-            break;
-        if (token[strlen(token) - 1] == '\n')
-            token[strlen(token) - 1] = '\0';
-
-        char *processed_token = replace_variables(token);
-        char* args[MAX_ARGS];
-        parse_command(processed_token, args);
-        int status = handle_command(args);
-        free(processed_token);
-
-        char* logical_op = strstr(token, "&&");
-        if (logical_op != NULL)
+        char *end = strchr(pos, ';');
+        if (end != NULL)
         {
-            if (last_command_exit_status != 0)
+            *end = '\0';
+        }
+
+        if (*pos == '#')
+        {
+            break;
+        }
+
+        char *processed_token = replace_variables(pos);
+        char *token = processed_token;
+
+        int continue_exec = 1;
+        while (continue_exec && *token != '\0')
+        {
+            char *logical_op_and = strstr(token, "&&");
+            char *logical_op_or = strstr(token, "||");
+
+            char *next_token = NULL;
+            if (logical_op_and != NULL)
+            {
+                next_token = logical_op_and;
+            }
+            else if (logical_op_or != NULL)
+            {
+                next_token = logical_op_or;
+            }
+            else
+            {
+                next_token = token + strlen(token);
+            }
+
+            char op = '\0';
+            if (next_token != NULL)
+            {
+                op = *next_token;
+                *next_token = '\0';
+            }
+
+            char *args[MAX_ARGS];
+            parse_command(token, args);
+            int status = handle_command(args);
+
+            if ((op == '&' && status != 0) || (op == '|' && status == 0))
+            {
+                continue_exec = 0;
+            }
+
+            if (next_token != NULL)
+            {
+                *next_token = op;
+                token = next_token + 2;
+            }
+            else
+            {
                 break;
+            }
+        }
+
+        if (end != NULL)
+        {
+            *end = ';';
+            pos = end + 1;
         }
         else
         {
-            logical_op = strstr(token, "||");
-            if (logical_op != NULL && last_command_exit_status == 0)
-                break;
+            break;
         }
 
-        token = strtok(NULL, ";");
+        free(processed_token);
     }
 }
 
 /**
  * handle_command - Handle individual commands and execute built-in commands
  * @args: Array of command arguments
- * 
+ *
  * Return: The exit status of the command
-*/
+ */
 int handle_command(char **args)
 {
     int status = 0;
@@ -145,7 +195,7 @@ int handle_command(char **args)
             exit(EXIT_SUCCESS);
         }
     }
-    else if(strcmp(args[0], "env") == 0)
+    else if (strcmp(args[0], "env") == 0)
     {
         print_environment();
     }
@@ -202,7 +252,7 @@ int handle_command(char **args)
             }
         }
     }
-    else if(strcmp(args[0], "cd") == 0)
+    else if (strcmp(args[0], "cd") == 0)
     {
         change_directory(args[1]);
     }
