@@ -5,6 +5,9 @@
 Alias aliases[MAX_ALIASES];
 int alias_count = 0;
 
+/**
+ * print_aliases - Prints all defined aliases
+*/
 void print_aliases()
 {
     for (int i = 0; i < alias_count; i++)
@@ -13,6 +16,10 @@ void print_aliases()
     }
 }
 
+/**
+ * print_alias - Prints the value of a specific alias
+ * @name: The name of the alias to be printed
+*/
 void print_alias(const char *name)
 {
     for (int i = 0; i < alias_count; i++)
@@ -24,6 +31,11 @@ void print_alias(const char *name)
     }
 }
 
+/**
+ * define_alias - Defines a new alias or updates an existing one
+ * @name: The name of the alias to be defined or updated
+ * @value: The value of the alias
+*/
 void define_alias(const char *name, const char *value)
 {
     int existing_alias_index = -1;
@@ -53,4 +65,3 @@ void define_alias(const char *name, const char *value)
         }
     }
 }
-

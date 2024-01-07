@@ -6,16 +6,28 @@
 #include <unistd.h>
 #include <sys/types.h>
 
+/**
+ * display_prompt - Displays the shell prompt
+*/
 void display_prompt(void)
 {
     printf("#cisfun$ ");
 }
 
+/**
+ * handle_errors - Handles errors and prints an error message
+ * @message: The error message to be displayed
+*/
 void handle_errors(const char* message)
 {
     perror(message);
 }
 
+/**
+ * get_user_input - Reads user input from stdin
+ * 
+ * Return: A pointer to the user input string, or NULL on failure
+*/
 char* get_user_input(void)
 {
     char* input = NULL;
@@ -36,6 +48,11 @@ char* get_user_input(void)
     return (input);
 }
 
+/**
+ * parse_command - Parses the command string into separate arguments
+ * @command: The command string to be parsed
+ * @args: An array to store the parsed arguments
+*/
 void parse_command(char* command, char** args)
 {
     char* token;
@@ -58,6 +75,10 @@ void parse_command(char* command, char** args)
     }
 }
 
+/**
+ * execute_command - Executes a command with its arguments
+ * @args: An array containing the command and its arguments
+*/
 void execute_command(char** args)
 {
     pid_t pid = fork();

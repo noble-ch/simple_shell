@@ -10,12 +10,18 @@
 #define MAX_ALIAS_NAME 50
 #define MAX_ALIAS_VALUE 100
 
+/**
+ * Structure to represent an alias with a name and value
+*/
 typedef struct
 {
-    char name[MAX_ALIAS_NAME];
-    char value[MAX_ALIAS_VALUE];
+    char name[MAX_ALIAS_NAME]; /** The name of the alias */
+    char value[MAX_ALIAS_VALUE]; /** The value of the alias */
 } Alias;
 
+/**
+ * External environment variable.
+*/
 extern char **environ;
 
 void display_prompt(void);

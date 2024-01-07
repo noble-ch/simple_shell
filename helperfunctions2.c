@@ -4,6 +4,9 @@
 #include <string.h>
 #include <unistd.h>
 
+/**
+ * print_environment - Prints the environment variables
+*/
 void print_environment(void)
 {
     char **env = environ;
@@ -15,8 +18,15 @@ void print_environment(void)
     }
 }
 
+/**
+ * check_command_existence - Checks if a command exists in the PATH
+ * @command: The command to check
+ * 
+ * Return: 1 if the command exists, 0 otherwise
+*/
 int check_command_existence(char *command)
 {
+    int command_found = 0;
     char *path_var = getenv("PATH");
     if (path_var == NULL)
     {
@@ -32,8 +42,6 @@ int check_command_existence(char *command)
 
     char *path = strtok(path_copy, ":");
     char exec_path[PATH_MAX_LEN];
-
-    int command_found = 0;
 
     while (path != NULL)
     {
@@ -51,6 +59,14 @@ int check_command_existence(char *command)
     return (command_found);
 }
 
+/**
+ * custom_getline - Custom implementation of getline for file input
+ * @lineptr: Pointer to the buffer containing the line
+ * @n: Pointer to the size of the buffer
+ * @stream: The input stream (file)
+ * 
+ * Return: The number of characters read, or -1 on failure
+*/
 ssize_t custom_getline(char **lineptr, size_t *n, FILE *stream)
 {
     size_t bufsize = 0;
@@ -90,6 +106,10 @@ ssize_t custom_getline(char **lineptr, size_t *n, FILE *stream)
     return (len);
 }
 
+/**
+ * change_directory - Changes the current working directory
+ * @new_directory: The new directory path
+*/
 void change_directory(const char *new_directory)
 {
     char current_directory[BUFFER_SIZE];

@@ -6,6 +6,14 @@
 
 int last_command_exit_status = 0;
 
+/**
+ * replace str - Replace all occurrences of a substring in a string
+ * @str: The original string
+ * @find: The substring to find and replace
+ * @replace: The replacement substring
+ * 
+ * Return: A new string with all occurrences of @find replaced by @replace
+*/
 char* replace_str(char* str, const char* find, const char* replace)
 {
     char* result;
@@ -46,6 +54,12 @@ char* replace_str(char* str, const char* find, const char* replace)
     return (result);
 }
 
+/**
+ * replace_variables - Replace special variables in the command string
+ * @command: The command string
+ * 
+ * Return: A new string with special variables replaced
+*/
 char* replace_variables(char* command)
 {
     char* result = strdup(command);
@@ -70,6 +84,10 @@ char* replace_variables(char* command)
     return result;
 }
 
+/**
+ * handle_commands - Handle multiple commands separated by logical operators
+ * @commands: The input commands string
+*/
 void handle_commands(char *commands)
 {
     char *token = strtok(commands, ";");
@@ -103,6 +121,12 @@ void handle_commands(char *commands)
     }
 }
 
+/**
+ * handle_command - Handle individual commands and execute built-in commands
+ * @args: Array of command arguments
+ * 
+ * Return: The exit status of the command
+*/
 int handle_command(char **args)
 {
     int status = 0;
