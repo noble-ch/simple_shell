@@ -117,11 +117,11 @@ void handle_commands(char *commands)
             char *logical_op_or = strstr(token, "||");
 
             char *next_token = NULL;
-            if (logical_op_and != NULL)
+            if (logical_op_and != NULL && (logical_op_or == NULL || logical_op_and < logical_op_or))
             {
                 next_token = logical_op_and;
             }
-            else if (logical_op_or != NULL)
+            else if (logical_op_or != NULL && (logical_op_and == NULL || logical_op_or < logical_op_and))
             {
                 next_token = logical_op_or;
             }
@@ -266,4 +266,50 @@ int handle_command(char **args)
         execute_command(args);
     }
     return status;
+}
+
+/**
+ * handle_variables - Replace special variables in the command string
+ * @command: The command string
+ *
+ * Return: A new string with special variables replaced
+ */
+char *handle_variables(char *command)
+{
+    char *result = strdup(command);
+    char *pos = result;
+    int escaped = 0;
+
+    while (*pos != '\0')
+    {
+        if (*pos == '\\' && !escaped)
+        {
+            escaped = 1;
+            pos++;
+            continue;
+        }
+
+        if (*pos == '$' && *(pos + 1) == '$' && !escaped)
+        {
+            char pid_str[10];
+            snprintf(pid_str, sizeof(pid_str), "%d", getpid());
+            result = replace_str(result, "$$", pid_str);
+            pos += 2; // Move past the current occurrence of "$$"
+        }
+        else if (*pos == '$' && *(pos + 1) == '?' && !escaped)
+        {
+            char status_str[10];
+            snprintf(status_str, sizeof(status_str), "%d", last_command_exit_status);
+            result = replace_str(result, "$?", status_str);
+            pos += 2; // Move past the current occurrence of "$?"
+        }
+        else
+        {
+            pos++;
+        }
+
+        escaped = 0;
+    }
+
+    return result;
 }

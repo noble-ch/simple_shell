@@ -57,7 +57,7 @@ int check_command_existence(char *command)
 
             if (access(exec_path, X_OK) == 0)
             {
-                printf("Executable found at: %s\n", exec_path);
+                /*printf("Executable found at: %s\n", exec_path);*/
                 command_found = 1;
                 break;
             }
