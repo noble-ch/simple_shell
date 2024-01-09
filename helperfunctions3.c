@@ -9,7 +9,7 @@ int last_command_exit_status = 0;
 /**
  * replace str - Replace all occurrences of a substring in a string
  * @str: The original string
- * @find: The substring to find and replace
+ * @find: substring to finding and replace
  * @replace: The replacement substring
  *
  * Return: A new string with all occurrences of @find replaced by @replace
@@ -87,7 +87,8 @@ char *replace_variables(char *command)
 }
 
 /**
- * handle_commands - Handle multiple commands separated by logical operators
+ * handle_commands - Handles multiple commands separated by logical operators like || &&
+ * 
  * @commands: The input commands string
  */
 void handle_commands(char *commands)
