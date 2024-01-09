@@ -40,5 +40,10 @@ void print_alias(const char *name);
 void define_alias(const char *name, const char *value);
 char* replace_variables(char* command);
 char* replace_str(char* str, const char* find, const char* replace);
+void process_file(char *filename);
+void process_input();
+
+void handle_setenv(char **args);
+void handle_unsetenv(char **args);
 
 #endif /* MAIN_H */

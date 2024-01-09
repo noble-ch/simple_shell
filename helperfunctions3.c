@@ -133,17 +133,7 @@ int handle_command(char **args)
 
     if (strcmp(args[0], "exit") == 0)
     {
-        if (args[1] != NULL)
-        {
-            status = atoi(args[1]);
-            printf("Exiting the shell with status code: %d\n", status);
-            exit(status);
-        }
-        else
-        {
-            printf("Exiting the shell\n");
-            exit(EXIT_SUCCESS);
-        }
+        handle_exit(args, &status);
     }
     else if(strcmp(args[0], "env") == 0)
     {
@@ -151,56 +141,15 @@ int handle_command(char **args)
     }
     else if (strcmp(args[0], "setenv") == 0)
     {
-        if (args[1] != NULL && args[2] != NULL)
-        {
-            if (setenv(args[1], args[2], 1) != 0)
-                fprintf(stderr, "Failed to set env variable\n");
-        }
-        else
-        {
-            fprintf(stderr, "Usage: setenv VARIABLE VALUE\n");
-        }
+        handle_setenv(args);
     }
     else if (strcmp(args[0], "unsetenv") == 0)
     {
-        if (args[1] != NULL)
-        {
-            if (unsetenv(args[1]) != 0)
-                fprintf(stderr, "Failed to unset env variable\n");
-        }
-        else
-        {
-            fprintf(stderr, "Usage: unsetenv VARIABLE\n");
-        }
+        handle_unsetenv(args);   
     }
     else if (strcmp(args[0], "alias") == 0)
     {
-        if (args[1] == NULL)
-        {
-            print_aliases();
-        }
-        else if (args[2] == NULL)
-        {
-            print_alias(args[1]);
-        }
-        else
-        {
-            int arg_index = 1;
-            while (args[arg_index] != NULL)
-            {
-                char *equal_sign = strchr(args[arg_index], '=');
-                if (equal_sign != NULL)
-                {
-                    *equal_sign = '\0';
-                    define_alias(args[arg_index], equal_sign + 1);
-                }
-                else
-                {
-                    fprintf(stderr, "Invalid alias definition: %s\n", args[arg_index]);
-                }
-                arg_index++;
-            }
-        }
+        handle_alias(args);
     }
     else if(strcmp(args[0], "cd") == 0)
     {
@@ -208,12 +157,92 @@ int handle_command(char **args)
     }
     else
     {
-        if (!check_command_existence(args[0]))
-        {
-            printf("Command not found: %s\n", args[0]);
-            status = 1;
-        }
-        execute_command(args);
+        handle_external_command(args, &status);
     }
     return status;
+}
+
+void handle_exit(char **args, int *status)
+{
+    if (args[1] != NULL)
+    {
+        *status = atoi(args[1]);
+        printf("Exiting the shell with status code: %d\n", *status);
+        exit(*status);
+    }
+    else
+    {
+        printf("Exiting the shell\n");
+        exit(EXIT_SUCCESS);
+    }
+}
+void handle_setenv(char **args)
+{
+    if (args[1] != NULL && args[2] != NULL)
+    {
+        if (setenv(args[1], args[2], 1) != 0)
+            fprintf(stderr, "Failed to set env variable\n");
+    }
+    else
+    {
+        fprintf(stderr, "Usage: setenv VARIABLE VALUE\n");
+    }
+}
+
+void handle_unsetenv(char **args)
+{
+    if (args[1] != NULL)
+    {
+        if (unsetenv(args[1]) != 0)
+            fprintf(stderr, "Failed to unset env variable\n");
+    }
+    else
+    {
+        fprintf(stderr, "Usage: unsetenv VARIABLE\n");
+    }
+}
+
+void handle_alias(char **args)
+{
+    if (args[1] == NULL)
+    {
+        print_aliases();
+    }
+    else if (args[2] == NULL)
+    {
+        print_alias(args[1]);
+    }
+    else
+    {
+        handle_alias_definition(args);
+    }
+}
+
+void handle_external_command(char **args, int *status)
+{
+    if (!check_command_existence(args[0]))
+    {
+        printf("Command not found: %s\n", args[0]);
+        status = 1;
+    }
+    execute_command(args);
+}
+
+void handle_alias_definition(char **args)
+{
+    int arg_index = 1;
+    while (args[arg_index] != NULL)
+    {
+        char *equal_sign = strchr(args[arg_index], '=');
+        if (equal_sign != NULL)
+        {
+            *equal_sign = '\0';
+            define_alias(args[arg_index], equal_sign + 1);
+        }
+        else
+        {
+            fprintf(stderr, "Invalid alias definition: %s\n", args[arg_index]);
+        }
+        arg_index++;
+    }
 }
