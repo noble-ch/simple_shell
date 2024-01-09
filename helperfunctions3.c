@@ -23,6 +23,8 @@ char *replace_str(char *str, const char *find, const char *replace)
     char *result;
     char *ins;
     char *tmp;
+    size_t len;
+    /*int last_command_exit_status = 0; */
 
     len_find = strlen(find);
     ins = str;
@@ -47,7 +49,7 @@ char *replace_str(char *str, const char *find, const char *replace)
     while (count--)
     {
         tmp = strstr(ins, find);
-        size_t len = tmp - ins;
+        len = tmp - ins;
         strncat(result, ins, len);
         strcat(result, replace);
         ins = tmp + len_find;
@@ -55,7 +57,6 @@ char *replace_str(char *str, const char *find, const char *replace)
     strcat(result, ins);
     return (result);
 }
-
 /**
  * replace_variables - Replace special variables in the command string
  * @command: The command string
@@ -88,12 +89,18 @@ char *replace_variables(char *command)
 
 /**
  * handle_commands - Handles multiple commands separated by logical operators like || &&
- * 
+ *
  * @commands: The input commands string
  */
 void handle_commands(char *commands)
 {
+    char *args[MAX_ARGS];
+    char op = '\0';
+    int status;
     char *pos = commands;
+    char *processed_token = replace_variables(pos);
+    char *token = processed_token;
+    int continue_exec = 1;
 
     while (*pos != '\0')
     {
@@ -108,10 +115,6 @@ void handle_commands(char *commands)
             break;
         }
 
-        char *processed_token = replace_variables(pos);
-        char *token = processed_token;
-
-        int continue_exec = 1;
         while (continue_exec && *token != '\0')
         {
             char *logical_op_and = strstr(token, "&&");
@@ -131,16 +134,15 @@ void handle_commands(char *commands)
                 next_token = token + strlen(token);
             }
 
-            char op = '\0';
             if (next_token != NULL)
             {
                 op = *next_token;
                 *next_token = '\0';
             }
 
-            char *args[MAX_ARGS];
             parse_command(token, args);
-            int status = handle_command(args);
+
+            status = handle_command(args);
 
             if ((op == '&' && status != 0) || (op == '|' && status == 0))
             {
@@ -295,14 +297,14 @@ char *handle_variables(char *command)
             char pid_str[10];
             snprintf(pid_str, sizeof(pid_str), "%d", getpid());
             result = replace_str(result, "$$", pid_str);
-            pos += 2; // Move past the current occurrence of "$$"
+            pos += 2;
         }
         else if (*pos == '$' && *(pos + 1) == '?' && !escaped)
         {
             char status_str[10];
             snprintf(status_str, sizeof(status_str), "%d", last_command_exit_status);
             result = replace_str(result, "$?", status_str);
-            pos += 2; // Move past the current occurrence of "$?"
+            pos += 2;
         }
         else
         {
