@@ -17,6 +17,7 @@ int last_command_exit_status = 0;
 
 size_t count = 0;
 size_t len_find;
+size_t len;
 
 char *replace_str(char *str, const char *find, const char *replace)
 {
@@ -47,7 +48,7 @@ char *replace_str(char *str, const char *find, const char *replace)
     while (count--)
     {
         tmp = strstr(ins, find);
-        size_t len = tmp - ins;
+        len = tmp - ins;
         strncat(result, ins, len);
         strcat(result, replace);
         ins = tmp + len_find;
@@ -88,13 +89,21 @@ char *replace_variables(char *command)
 
 /**
  * handle_commands - Handles multiple commands separated by logical operators like || &&
- * 
+ *
  * @commands: The input commands string
  */
 void handle_commands(char *commands)
 {
     char *pos = commands;
-
+    int status;
+    char *args[MAX_ARGS];
+    char op;
+    char *logical_op_and;
+    char *logical_op_or;
+    char *next_token;
+    char *processed_token;
+    char *token;
+    int continue_exec;
     while (*pos != '\0')
     {
         char *end = strchr(pos, ';');
@@ -108,16 +117,16 @@ void handle_commands(char *commands)
             break;
         }
 
-        char *processed_token = replace_variables(pos);
-        char *token = processed_token;
+        processed_token = replace_variables(pos);
+        token = processed_token;
 
-        int continue_exec = 1;
+        continue_exec = 1;
         while (continue_exec && *token != '\0')
         {
-            char *logical_op_and = strstr(token, "&&");
-            char *logical_op_or = strstr(token, "||");
+            logical_op_and = strstr(token, "&&");
+            logical_op_or = strstr(token, "||");
 
-            char *next_token = NULL;
+            next_token = NULL;
             if (logical_op_and != NULL && (logical_op_or == NULL || logical_op_and < logical_op_or))
             {
                 next_token = logical_op_and;
@@ -131,16 +140,15 @@ void handle_commands(char *commands)
                 next_token = token + strlen(token);
             }
 
-            char op = '\0';
+            op = '\0';
             if (next_token != NULL)
             {
                 op = *next_token;
                 *next_token = '\0';
             }
 
-            char *args[MAX_ARGS];
             parse_command(token, args);
-            int status = handle_command(args);
+            status = handle_command(args);
 
             if ((op == '&' && status != 0) || (op == '|' && status == 0))
             {
@@ -295,14 +303,14 @@ char *handle_variables(char *command)
             char pid_str[10];
             snprintf(pid_str, sizeof(pid_str), "%d", getpid());
             result = replace_str(result, "$$", pid_str);
-            pos += 2; // Move past the current occurrence of "$$"
+            pos += 2;
         }
         else if (*pos == '$' && *(pos + 1) == '?' && !escaped)
         {
             char status_str[10];
             snprintf(status_str, sizeof(status_str), "%d", last_command_exit_status);
             result = replace_str(result, "$?", status_str);
-            pos += 2; // Move past the current occurrence of "$?"
+            pos += 2;
         }
         else
         {

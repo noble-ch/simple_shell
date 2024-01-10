@@ -28,25 +28,27 @@ int check_command_existence(char *command)
 {
     int command_found = 0;
     char *path_var = getenv("PATH");
-
+    char exec_path[PATH_MAX_LEN];
+    char *start;
+    char *end;
+    char *path_copy;
     if (path_var == NULL)
     {
         fprintf(stderr, "Error: PATH environment not found\n");
         return 0;
     }
 
-    char *path_copy = strdup(path_var);
+    path_copy = strdup(path_var);
     if (path_copy == NULL)
     {
         fprintf(stderr, "Error: Memory allocation failed\n");
         return 0;
     }
 
-    size_t path_len = strlen(path_copy);
-    char exec_path[PATH_MAX_LEN];
+    /* size_t path_len = strlen(path_copy); */
 
-    char *start = path_copy;
-    char *end = path_copy;
+    start = path_copy;
+    end = path_copy;
 
     while (*end != '\0')
     {
@@ -83,6 +85,7 @@ ssize_t custom_getline(char **lineptr, size_t *n, FILE *stream)
     size_t bufsize = 0;
     int c;
     ssize_t len = 0;
+    char *new_ptr;
 
     if (lineptr == NULL || n == NULL)
         return (-1);
@@ -98,10 +101,10 @@ ssize_t custom_getline(char **lineptr, size_t *n, FILE *stream)
 
     while ((c = fgetc(stream)) != EOF && c != '\n')
     {
-        if (len + 1 >= *n)
+        if ((size_t)(len + 1) >= *n)
         {
             bufsize *= 2;
-            char *new_ptr = (char *)realloc(*lineptr, bufsize);
+            new_ptr = (char *)realloc(*lineptr, bufsize);
             if (new_ptr == NULL)
                 return (-1);
             *lineptr = new_ptr;
