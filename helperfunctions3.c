@@ -4,7 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 
-int last_command_exit_status = 0;
+
 
 /**
  * replace str - Replace all occurrences of a substring in a string
@@ -18,43 +18,39 @@ int last_command_exit_status = 0;
 size_t count = 0;
 size_t len_find;
 size_t len;
+int last_command_exit_status = 0;
 
 char *replace_str(char *str, const char *find, const char *replace)
 {
-    char *result;
-    char *ins;
-    char *tmp;
+char *result;
+char *ins;
+char *tmp;
+len_find = strlen(find);
+ins = str;
 
-    len_find = strlen(find);
-    ins = str;
-
-    while ((tmp = strstr(ins, find)) != NULL)
-    {
-        ins = tmp + len_find;
-        count++;
-    }
-
-    result = (char *)malloc(strlen(str) + (strlen(replace) - len_find) * count + 1);
-
-    if (result == NULL)
-    {
-        fprintf(stderr, "Memory allocation error\n");
-        exit(EXIT_FAILURE);
-    }
-
-    *result = '\0';
-
-    ins = str;
-    while (count--)
-    {
-        tmp = strstr(ins, find);
-        len = tmp - ins;
-        strncat(result, ins, len);
-        strcat(result, replace);
-        ins = tmp + len_find;
-    }
-    strcat(result, ins);
-    return (result);
+while ((tmp = strstr(ins, find)) != NULL)
+{
+ins = tmp + len_find;
+count++;
+}
+result = (char *)malloc(strlen(str) + (strlen(replace) - len_find) * count + 1);
+	if (result == NULL)
+	{
+	fprintf(stderr, "Memory allocation error\n");
+	exit(EXIT_FAILURE);
+	}
+	*result = '\0';
+	ins = str;
+while (count--)
+{        
+tmp = strstr(ins, find);
+len = tmp - ins;
+strncat(result, ins, len);
+strcat(result, replace);
+ins = tmp + len_find;
+}
+strcat(result, ins);
+return (result);
 }
 
 /**
@@ -65,26 +61,24 @@ char *replace_str(char *str, const char *find, const char *replace)
  */
 char *replace_variables(char *command)
 {
-    char *result = strdup(command);
-    char *pos = strstr(result, "$?");
-    if (pos != NULL)
-    {
-        char status_str[10];
-        snprintf(status_str, sizeof(status_str), "%d", last_command_exit_status);
-        free(result);
-        result = replace_str(command, "$?", status_str);
-    }
-
-    pos = strstr(result, "$$");
-    if (pos != NULL)
-    {
-        char pid_str[10];
-        snprintf(pid_str, sizeof(pid_str), "%d", getpid());
-        free(result);
-        result = replace_str(command, "$$", pid_str);
-    }
-
-    return result;
+char *result = strdup(command);
+char *pos = strstr(result, "$?");
+	if (pos != NULL)
+	{
+	char status_str[10];
+	snprintf(status_str, sizeof(status_str), "%d", last_command_exit_status);
+	free(result);
+	result = replace_str(command, "$?", status_str);
+	}
+	pos = strstr(result, "$$");
+	if (pos != NULL)
+	{
+	char pid_str[10];
+	snprintf(pid_str, sizeof(pid_str), "%d", getpid());
+	free(result);
+	result = replace_str(command, "$$", pid_str);
+	}
+	return result;
 }
 
 /**
@@ -94,79 +88,72 @@ char *replace_variables(char *command)
  */
 void handle_commands(char *commands)
 {
-    char *pos = commands;
-    int status;
-    char *args[MAX_ARGS];
-    char op;
-    char *logical_op_and;
-    char *logical_op_or;
-    char *next_token;
-    char *processed_token;
-    char *token;
-    int continue_exec;
-    while (*pos != '\0')
-    {
-        char *end = strchr(pos, ';');
-        if (end != NULL)
-        {
-            *end = '\0';
-        }
+char *pos = commands;
+int status;
+char *args[MAX_ARGS];
+char op;
+char *logical_op_and;
+char *logical_op_or;
+char *next_token;
+char *processed_token;
+char *token;
+int continue_exec;
+while (*pos != '\0')
+	{
+	char *end = strchr(pos, ';');
+	if (end != NULL)
+	{
+	*end = '\0';
+	}
 
-        if (*pos == '#')
-        {
-            break;
-        }
+	if (*pos == '#')
+	{
+	break;
+	}
+	processed_token = replace_variables(pos);
+	token = processed_token;
+	continue_exec = 1;
+	while (continue_exec && *token != '\0')
+	{
+	logical_op_and = strstr(token, "&&");
+	logical_op_or = strstr(token, "||");
+	next_token = NULL;
+		if (logical_op_and != NULL && (logical_op_or == NULL || logical_op_and < logical_op_or))
+		{
+		next_token = logical_op_and;
+		}
+		else if (logical_op_or != NULL && (logical_op_and == NULL || logical_op_or < logical_op_and))
+		{
+		next_token = logical_op_or;
+		}
+		else
+		{
+		next_token = token + strlen(token);
+		}
+		op = '\0';
+		if (next_token != NULL)
+		{
+		op = *next_token;
+		*next_token = '\0';
+		}
+		parse_command(token, args);
+		status = handle_command(args);
+		if ((op == '&' && status != 0) || (op == '|' && status == 0))
+		{
+		continue_exec = 0;
+		}
 
-        processed_token = replace_variables(pos);
-        token = processed_token;
-
-        continue_exec = 1;
-        while (continue_exec && *token != '\0')
-        {
-            logical_op_and = strstr(token, "&&");
-            logical_op_or = strstr(token, "||");
-
-            next_token = NULL;
-            if (logical_op_and != NULL && (logical_op_or == NULL || logical_op_and < logical_op_or))
-            {
-                next_token = logical_op_and;
-            }
-            else if (logical_op_or != NULL && (logical_op_and == NULL || logical_op_or < logical_op_and))
-            {
-                next_token = logical_op_or;
-            }
-            else
-            {
-                next_token = token + strlen(token);
-            }
-
-            op = '\0';
-            if (next_token != NULL)
-            {
-                op = *next_token;
-                *next_token = '\0';
-            }
-
-            parse_command(token, args);
-            status = handle_command(args);
-
-            if ((op == '&' && status != 0) || (op == '|' && status == 0))
-            {
-                continue_exec = 0;
-            }
-
-            if (next_token != NULL)
-            {
-                *next_token = op;
-                token = next_token + 2;
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        if (end != NULL)
+		if (next_token != NULL)
+		{
+		*next_token = op;
+		token = next_token + 2;
+		}
+		else
+		{
+		break;
+		}
+		}
+		if (end != NULL)
         {
             *end = ';';
             pos = end + 1;
