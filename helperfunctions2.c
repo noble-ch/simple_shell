@@ -6,7 +6,7 @@
 
 /**
  * print_environment - Prints the environment variables
-*/
+ */
 void print_environment(void)
 {
     char **env = environ;
@@ -21,30 +21,35 @@ void print_environment(void)
 /**
  * check_command_existence - Checks if a command exists in the PATH
  * @command: The command to check
- * 
+ *
  * Return: 1 if the command exists, 0 otherwise
-*/
+ */
 int check_command_existence(char *command)
 {
     int command_found = 0;
     char *path_var = getenv("PATH");
+    char *path_copy = strdup(path_var);
+    char *path = path_copy;
+    char exec_path[PATH_MAX_LEN];
+
     if (path_var == NULL)
     {
         fprintf(stderr, "Error: PATH environment not found\n");
         return (0);
     }
-    char *path_copy = strdup(path_var);
     if (path_copy == NULL)
     {
         fprintf(stderr, "Error: Memory allocation failed\n");
         return (0);
     }
-
-    char *path = strtok(path_copy, ":");
-    char exec_path[PATH_MAX_LEN];
-
     while (path != NULL)
     {
+        char *colon = strchr(path, ':');
+        if (colon != NULL)
+        {
+            *colon = '\0';
+        }
+
         snprintf(exec_path, sizeof(exec_path), "%s/%s", path, command);
 
         if (access(exec_path, X_OK) == 0)
@@ -53,7 +58,15 @@ int check_command_existence(char *command)
             command_found = 1;
             break;
         }
-        path = strtok(NULL, ":");
+
+        if (colon != NULL)
+        {
+            path = colon + 1;
+        }
+        else
+        {
+            path = NULL;
+        }
     }
     free(path_copy);
     return (command_found);
@@ -64,9 +77,9 @@ int check_command_existence(char *command)
  * @lineptr: Pointer to the buffer containing the line
  * @n: Pointer to the size of the buffer
  * @stream: The input stream (file)
- * 
+ *
  * Return: The number of characters read, or -1 on failure
-*/
+ */
 ssize_t custom_getline(char **lineptr, size_t *n, FILE *stream)
 {
     size_t bufsize = 0;
@@ -84,7 +97,6 @@ ssize_t custom_getline(char **lineptr, size_t *n, FILE *stream)
             return (-1);
         *n = bufsize;
     }
-
     while ((c = fgetc(stream)) != EOF && c != '\n')
     {
         if (len + 1 >= *n)
@@ -98,7 +110,6 @@ ssize_t custom_getline(char **lineptr, size_t *n, FILE *stream)
         }
         (*lineptr)[len++] = c;
     }
-
     if (c == EOF && len == 0)
         return (len);
 
@@ -109,7 +120,7 @@ ssize_t custom_getline(char **lineptr, size_t *n, FILE *stream)
 /**
  * change_directory - Changes the current working directory
  * @new_directory: The new directory path
-*/
+ */
 void change_directory(const char *new_directory)
 {
     char current_directory[BUFFER_SIZE];

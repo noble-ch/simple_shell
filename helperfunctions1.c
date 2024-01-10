@@ -8,7 +8,7 @@
 
 /**
  * display_prompt - Displays the shell prompt
-*/
+ */
 void display_prompt(void)
 {
     printf("#cisfun$ ");
@@ -17,22 +17,21 @@ void display_prompt(void)
 /**
  * handle_errors - Handles errors and prints an error message
  * @message: The error message to be displayed
-*/
-void handle_errors(const char* message)
+ */
+void handle_errors(const char *message)
 {
     perror(message);
 }
 
 /**
  * get_user_input - Reads user input from stdin
- * 
+ *
  * Return: A pointer to the user input string, or NULL on failure
-*/
-char* get_user_input(void)
+ */
+char *get_user_input(void)
 {
-    char* input = NULL;
+    char *input = NULL;
     size_t bufsize = 0;
-
 
     if (getline(&input, &bufsize, stdin) == -1)
     {
@@ -52,23 +51,29 @@ char* get_user_input(void)
  * parse_command - Parses the command string into separate arguments
  * @command: The command string to be parsed
  * @args: An array to store the parsed arguments
-*/
-void parse_command(char* command, char** args)
+ */
+void parse_command(char *command, char **args)
 {
-    char* token;
-    int index = 0;
+    char *token;
+    int index;
 
-    token = strtok(command, " ");
-    args[index++] = token;
+    token = command;
+    index = 0;
 
-    while (token != NULL && index < MAX_ARGS - 1)
+    while (*token != '\0')
     {
-        token = strtok(NULL, " ");
-        args[index++] = token;
+        if (*token == " ")
+        {
+            *token = '\0';
+            args[index++] = command;
+            command = token + 1;
+        }
+        token++;
     }
+    args[index++] = command;
     args[index] = NULL;
 
-    if (index >= MAX_ARGS - 1)
+    if (index >= MAX_ARGS)
     {
         fprintf(stderr, "Too many arguments. Increase MAX_ARGS.\n");
         exit(EXIT_FAILURE);
@@ -78,8 +83,8 @@ void parse_command(char* command, char** args)
 /**
  * execute_command - Executes a command with its arguments
  * @args: An array containing the command and its arguments
-*/
-void execute_command(char** args)
+ */
+void execute_command(char **args)
 {
     pid_t pid = fork();
 

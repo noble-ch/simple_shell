@@ -1,10 +1,13 @@
 #include "main.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+char *command;
+size_t bufsize = BUFFER_SIZE;
 
 void process_file(char *filename)
 {
-    char *command;
-
     FILE *file = fopen(filename, "r");
     if (file == NULL)
     {
@@ -12,13 +15,13 @@ void process_file(char *filename)
         exit(EXIT_FAILURE);
     }
 
-    command = (char*)malloc(BUFFER_SIZE * sizeof(char));
+    command = (char *)malloc(BUFFER_SIZE * sizeof(char));
     if (command == NULL)
     {
         handle_errors("malloc error");
         exit(EXIT_FAILURE);
     }
-    
+
     while (custom_getline(&command, &bufsize, file) == -1)
     {
         if (strlen(command) > 0)
@@ -30,9 +33,7 @@ void process_file(char *filename)
 
 void process_input()
 {
-    char *command;
-
-    command = (char*)malloc(BUFFER_SIZE * sizeof(char));
+    command = (char *)malloc(BUFFER_SIZE * sizeof(char));
     if (command == NULL)
     {
         handle_errors("malloc error");

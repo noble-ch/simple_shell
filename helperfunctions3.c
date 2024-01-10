@@ -11,14 +11,14 @@ int last_command_exit_status = 0;
  * @str: The original string
  * @find: The substring to find and replace
  * @replace: The replacement substring
- * 
+ *
  * Return: A new string with all occurrences of @find replaced by @replace
-*/
-char* replace_str(char* str, const char* find, const char* replace)
+ */
+char *replace_str(char *str, const char *find, const char *replace)
 {
-    char* result;
-    char* ins;
-    char* tmp;
+    char *result;
+    char *ins;
+    char *tmp;
     size_t len_find;
 
     len_find = strlen(find);
@@ -31,7 +31,7 @@ char* replace_str(char* str, const char* find, const char* replace)
         count++;
     }
 
-    result = (char*)malloc(strlen(str) + (strlen(replace) - len_find) * count + 1);
+    result = (char *)malloc(strlen(str) + (strlen(replace) - len_find) * count + 1);
 
     if (result == NULL)
     {
@@ -57,13 +57,13 @@ char* replace_str(char* str, const char* find, const char* replace)
 /**
  * replace_variables - Replace special variables in the command string
  * @command: The command string
- * 
+ *
  * Return: A new string with special variables replaced
-*/
-char* replace_variables(char* command)
+ */
+char *replace_variables(char *command)
 {
-    char* result = strdup(command);
-    char* pos = strstr(result, "$?");
+    char *result = strdup(command);
+    char *pos = strstr(result, "$?");
     if (pos != NULL)
     {
         char status_str[10];
@@ -87,10 +87,20 @@ char* replace_variables(char* command)
 /**
  * handle_commands - Handle multiple commands separated by logical operators
  * @commands: The input commands string
-*/
+ */
 void handle_commands(char *commands)
 {
-    char *token = strtok(commands, ";");
+    char *token = commands;
+    while (*commands != '\0')
+    {
+        if (*commands == ';')
+        {
+            *commands = "\0";
+            token = commands + 1;
+        }
+        commands++;
+    }
+
     while (token != NULL)
     {
         if (token[0] == '#')
@@ -99,12 +109,12 @@ void handle_commands(char *commands)
             token[strlen(token) - 1] = '\0';
 
         char *processed_token = replace_variables(token);
-        char* args[MAX_ARGS];
+        char *args[MAX_ARGS];
         parse_command(processed_token, args);
         int status = handle_command(args);
         free(processed_token);
 
-        char* logical_op = strstr(token, "&&");
+        char *logical_op = strstr(token, "&&");
         if (logical_op != NULL)
         {
             if (last_command_exit_status != 0)
@@ -116,17 +126,16 @@ void handle_commands(char *commands)
             if (logical_op != NULL && last_command_exit_status == 0)
                 break;
         }
-
-        token = strtok(NULL, ";");
+        token = commands;
     }
 }
 
 /**
  * handle_command - Handle individual commands and execute built-in commands
  * @args: Array of command arguments
- * 
+ *
  * Return: The exit status of the command
-*/
+ */
 int handle_command(char **args)
 {
     int status = 0;
@@ -135,7 +144,7 @@ int handle_command(char **args)
     {
         handle_exit(args, &status);
     }
-    else if(strcmp(args[0], "env") == 0)
+    else if (strcmp(args[0], "env") == 0)
     {
         print_environment();
     }
@@ -145,13 +154,13 @@ int handle_command(char **args)
     }
     else if (strcmp(args[0], "unsetenv") == 0)
     {
-        handle_unsetenv(args);   
+        handle_unsetenv(args);
     }
     else if (strcmp(args[0], "alias") == 0)
     {
         handle_alias(args);
     }
-    else if(strcmp(args[0], "cd") == 0)
+    else if (strcmp(args[0], "cd") == 0)
     {
         change_directory(args[1]);
     }
@@ -223,9 +232,13 @@ void handle_external_command(char **args, int *status)
     if (!check_command_existence(args[0]))
     {
         printf("Command not found: %s\n", args[0]);
-        status = 1;
+        *status = 1;
     }
-    execute_command(args);
+    else
+    {
+        execute_command(args);
+        *status = 0;
+    }
 }
 
 void handle_alias_definition(char **args)
