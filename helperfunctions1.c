@@ -11,7 +11,7 @@
  */
 void display_prompt(void)
 {
-printf("#cisfun$ ");
+	printf("#cisfun$ ");
 }
 
 /**
@@ -20,7 +20,7 @@ printf("#cisfun$ ");
  */
 void handle_errors(const char *message)
 {
-perror(message);
+	perror(message);
 }
 
 /**
@@ -30,21 +30,19 @@ perror(message);
  */
 char *get_user_input(void)
 {
-char *input = NULL;
-size_t bufsize = 0;
+	char *input = NULL;
+	size_t bufsize = 0;
 
 	if (getline(&input, &bufsize, stdin) == -1)
 	{
-	handle_errors("getline error");
-	return (NULL);
+		handle_errors("getline error");
+		return (NULL);
 	}
-
 	if (input[strlen(input) - 1] == '\n')
 	{
-	input[strlen(input) - 1] = '\0';
+		input[strlen(input) - 1] = '\0';
 	}
-
-return (input);
+	return (input);
 }
 
 /**
@@ -54,40 +52,38 @@ return (input);
  */
 void parse_command(char *command, char **args)
 {
-int index = 0;
-int in_arg = 0;
+	int index = 0;
+	int in_arg = 0;
 
-while (*command != '\0')
-{
-while (*command == ' ' || *command == '\t')
-command++;
-	if (*command == '\0')
-		break;
-	in_arg = 1;
-
-	if (index < MAX_ARGS - 1)
+	while (*command != '\0')
 	{
-	args[index++] = command;
-
-	while (*command != '\0' && *command != ' ' && *command != '\t')
-	command++;
-	if (*command != '\0')
-	{
-	*command = '\0'; /*Null-terminate the argument*/
-	command++;
+		while (*command == ' ' || *command == '\t')
+			command++;
+		if (*command == '\0')
+			break;
+		in_arg = 1;
+		if (index < MAX_ARGS - 1)
+		{
+			args[index++] = command;
+			while (*command != '\0' && *command != ' ' && *command != '\t')
+				command++;
+			if (*command != '\0')
+			{
+				*command = '\0';
+				command++;
+			}
+		}
+		else
+		{
+			fprintf(stderr, "Too many arguments. Increase MAX_ARGS.\n");
+			exit(EXIT_FAILURE);
+		}
 	}
-	}
-	else
-	{
-	fprintf(stderr, "Too many arguments. Increase MAX_ARGS.\n");
-	exit(EXIT_FAILURE);
-	}
-}
-args[index] = NULL;
+	args[index] = NULL;
 	if (in_arg && index >= MAX_ARGS - 1)
 	{
-	fprintf(stderr, "Too many arguments. Increase MAX_ARGS.\n");
-	exit(EXIT_FAILURE);
+		fprintf(stderr, "Too many arguments. Increase MAX_ARGS.\n");
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -97,24 +93,26 @@ args[index] = NULL;
  */
 void execute_command(char **args)
 {
-pid_t pid = fork();
+	pid_t pid = fork();
+
 	if (pid == -1)
 	{
-	handle_errors("fork error");
-	exit(EXIT_FAILURE);
+		handle_errors("fork error");
+		exit(EXIT_FAILURE);
 	}
 	else if (pid == 0)
 	{
 		if (execvp(args[0], args) == -1)
 		{
-		fprintf(stderr, "Cmd not found: %s\n", args[0]);
-		exit(1);
+			fprintf(stderr, "Cmd not found: %s\n", args[0]);
+			exit(1);
 		}
 	}
 	else
 	{
-int status;
-	waitpid(pid, &status, 0);
+		int status;
+
+		waitpid(pid, &status, 0);
 	}
 }
 

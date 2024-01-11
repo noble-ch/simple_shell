@@ -5,6 +5,8 @@
 #include <string.h>
 #include <sys/types.h>
 
+void process_input(FILE *stream);
+
 /**
  * main - Entry point for the shell program
  * @argc: The number of command line arguments
@@ -21,64 +23,57 @@
 
 int main(int argc, char *argv[])
 {
-    char *command;
-    size_t bufsize;
+	if (argc > 2)
+	{
+		fprintf(stderr, "Usage: %s [filename]\n", argv[0]);
+		exit(EXIT_FAILURE);
+	}
+	if (argc == 2)
+	{
+		FILE *file;
 
-    bufsize = BUFFER_SIZE;
-    if (argc > 2)
-    {
-        fprintf(stderr, "Usage: %s [filename]\n", argv[0]);
-        exit(EXIT_FAILURE);
-    }
+		file = fopen(argv[1], "r");
+		if (file == NULL)
+		{
+			perror("Error opening file");
+			exit(EXIT_FAILURE);
+		}
+		process_input(file);
+		fclose(file);
+	}
+	else
+	{
+		process_input(stdin);
+	}
 
-    if (argc == 2)
-    {
-        FILE *file = fopen(argv[1], "r");
-        if (file == NULL)
-        {
-            perror("Error opening file");
-            exit(EXIT_FAILURE);
-        }
+	return (0);
+}
 
-        command = (char *)malloc(bufsize * sizeof(char));
-        if (command == NULL)
-        {
-            handle_errors("malloc error");
-            exit(EXIT_FAILURE);
-        }
+/**
+ * process_input - Process user input from a specified stream
+ * @stream: The input stream
+ */
 
-        while (custom_getline(&command, &bufsize, file) == -1)
-        {
-            if (strlen(command) > 0)
-                handle_commands(command);
-        }
-        free(command);
-        fclose(file);
-        return (0);
-    }
+void process_input(FILE *stream)
+{
+	char *command;
+	size_t bufsize;
 
-    command = (char *)malloc(bufsize * sizeof(char));
+	command = NULL;
+	bufsize = BUFFER_SIZE;
 
-    if (command == NULL)
-    {
-        handle_errors("malloc error");
-        exit(EXIT_FAILURE);
-    }
-    while (1)
-    {
-        display_prompt();
+	while (1)
+	{
+		display_prompt();
 
-        if (custom_getline(&command, &bufsize, stdin) == -1)
-        {
-            printf("\n");
-            break;
-        }
+		if (custom_getline(&command, &bufsize, stream) == -1)
+		{
+			printf("\n");
+			break;
+		}
 
-        if (strlen(command) == 0)
-            continue;
-
-        handle_commands(command);
-    }
-    free(command);
-    return (0);
+		if (strlen(command) > 0)
+			handle_commands(command);
+	}
+	free(command);
 }

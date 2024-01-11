@@ -41,5 +41,13 @@ void print_alias(const char *name);
 void define_alias(const char *name, const char *value);
 char *replace_variables(char *command);
 char *replace_str(char *str, const char *find, const char *replace);
+void handle_exit(char **args, int *status);
+void handle_setenv(char **args);
+void handle_unsetenv(char **args);
+void handle_alias(char **args);
+void handle_external_command(char **args, int *status);
+void handle_alias_definition(char **args);
+void process_token(char *token, int *last_command_exit_status);
+void check_logical_ops(char *logical_op, int *last_command_exit_status);
 
 #endif /* MAIN_H */
