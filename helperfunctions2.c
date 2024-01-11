@@ -6,7 +6,7 @@
 
 /**
  * print_environment - Prints the environment variables
-*/
+ */
 void print_environment(void)
 {
     char **env = environ;
@@ -21,27 +21,29 @@ void print_environment(void)
 /**
  * check_command_existence - Checks if a command exists in the PATH
  * @command: The command to check
- * 
+ *
  * Return: 1 if the command exists, 0 otherwise
-*/
+ */
 int check_command_existence(char *command)
 {
+    char *path;
     int command_found = 0;
+    char *path_copy;
+    char exec_path[PATH_MAX_LEN];
     char *path_var = getenv("PATH");
     if (path_var == NULL)
     {
         fprintf(stderr, "Error: PATH environment not found\n");
         return (0);
     }
-    char *path_copy = strdup(path_var);
+    path_copy = strdup(path_var);
     if (path_copy == NULL)
     {
         fprintf(stderr, "Error: Memory allocation failed\n");
         return (0);
     }
 
-    char *path = strtok(path_copy, ":");
-    char exec_path[PATH_MAX_LEN];
+    path = strtok(path_copy, ":");
 
     while (path != NULL)
     {
@@ -64,13 +66,14 @@ int check_command_existence(char *command)
  * @lineptr: Pointer to the buffer containing the line
  * @n: Pointer to the size of the buffer
  * @stream: The input stream (file)
- * 
+ *
  * Return: The number of characters read, or -1 on failure
-*/
+ */
 ssize_t custom_getline(char **lineptr, size_t *n, FILE *stream)
 {
     size_t bufsize = 0;
     int c;
+    char *new_ptr;
     ssize_t len = 0;
 
     if (lineptr == NULL || n == NULL)
@@ -87,10 +90,10 @@ ssize_t custom_getline(char **lineptr, size_t *n, FILE *stream)
 
     while ((c = fgetc(stream)) != EOF && c != '\n')
     {
-        if (len + 1 >= *n)
+        if ((size_t)(len + 1) >= *n)
         {
             bufsize *= 2;
-            char *new_ptr = (char *)realloc(*lineptr, bufsize);
+            new_ptr = (char *)realloc(*lineptr, bufsize);
             if (new_ptr == NULL)
                 return (-1);
             *lineptr = new_ptr;
@@ -109,7 +112,7 @@ ssize_t custom_getline(char **lineptr, size_t *n, FILE *stream)
 /**
  * change_directory - Changes the current working directory
  * @new_directory: The new directory path
-*/
+ */
 void change_directory(const char *new_directory)
 {
     char current_directory[BUFFER_SIZE];
