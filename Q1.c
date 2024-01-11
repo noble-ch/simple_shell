@@ -1,4 +1,3 @@
-#include "main.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -36,7 +35,7 @@ pid_t pid;
 command = (char *)malloc(bufsize * sizeof(char));
 	if (command == NULL)
 	{
-	perror("malloc error");
+	handle_errors("malloc error");
 	exit(1);
 	}
 while (1)
@@ -52,7 +51,7 @@ while (1)
 	pid = fork();
 	if (pid == -1)
 	{
-	perror("fork error");
+	handle_errors("fork error");
 	exit(1);
 	}
 	else if (pid == 0)
@@ -60,14 +59,14 @@ while (1)
 		char **args = (char **)malloc(2 * sizeof(char *));
 	if (args == NULL)
 	{
-	perror("malloc error");
+	handle_errors("malloc error");
 	exit(1);
 	}
 	args[0] = command;
 	args[1] = NULL;
 	if (execve(args[0], args, NULL) == -1)
 	{
-	perror("execve error");
+	handle_errors("execve error");
 	exit(1);
 	}
 	free(args);
