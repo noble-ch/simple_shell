@@ -41,13 +41,23 @@ char *path_var(char **env)
 	size_t i = 0, var = 0, count = 5;
 	char *path = NULL;
 
-	for (i = 0; comp_string(env[i], "PATH=", 5); i++)
-		;
-	if (env[i] == NULL)
-		return (NULL);
+	while (comp_string(env[i], "PATH=", 5))
+	{
+		i++;
+	}
 
-	for (count = 5; env[i][var]; var++, count++)
-		;
+	if (env[i] == NULL)
+	{
+		return NULL;
+	}
+
+	count = 5;
+
+	while (env[i][var])
+	{
+		var++;
+		count++;
+	}
 	path = malloc(sizeof(char) * (count + 1));
 
 	if (path == NULL)
