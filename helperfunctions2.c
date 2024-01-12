@@ -41,7 +41,7 @@ int comp_strval(char *str1, char *str2)
 	{
 		if (str1[a] != str2[a])
 		{
-			return (int)(str1[a] - str2[a]);
+			return ((int)(str1[a] - str2[a]));
 		}
 
 		a++;
@@ -87,7 +87,7 @@ size_t comp_string(char *str1, char *str2, size_t n)
 
 		if (i != 0)
 		{
-			return i;
+			return (i);
 		}
 
 		j++;
