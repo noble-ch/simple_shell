@@ -63,8 +63,15 @@ char *path_var(char **env)
 	if (path == NULL)
 		return (NULL);
 
-	for (var = 5, count = 0; env[i][var]; var++, count++)
+	var = 5;
+	count = 0;
+
+	while (env[i][var])
+	{
 		path[count] = env[i][var];
+		var++;
+		count++;
+	}
 
 	path[count] = '\0';
 	return (path);
