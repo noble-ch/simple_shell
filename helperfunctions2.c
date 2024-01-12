@@ -12,15 +12,13 @@ char *concat(char *destination, char *source)
 	int dest = 0;
 	int src = 0;
 
-	while (destination[dest] != '\0')
-	{
-		dest++;
-	}
-	while (source[src] != '\0')
+	for (dest = 0; destination[dest] != '\0'; dest++)
+		;
+
+	for (src = 0; source[src] != '\0'; src++)
 	{
 		destination[dest] = source[src];
 		dest++;
-		src++;
 	}
 	destination[dest] = '\0';
 	return (destination);
@@ -37,10 +35,16 @@ int comp_strval(char *str1, char *str2)
 {
 	int a;
 
-	for (a = 0; str1[a] != '\0' && str2[a] != '\0'; a++)
+	a = 0;
+
+	while (str1[a] != '\0' && str2[a] != '\0')
 	{
 		if (str1[a] != str2[a])
-			return ((int)str1[a] - str2[a]);
+		{
+			return (int)(str1[a] - str2[a]);
+		}
+
+		a++;
 	}
 	return (0);
 }
@@ -75,14 +79,18 @@ size_t comp_string(char *str1, char *str2, size_t n)
 {
 	size_t i, j;
 
-	for (j = 0; str1[j] != '\0' && j < n; j++)
+	j = 0;
+
+	while (str1[j] != '\0' && j < n)
 	{
 		i = str1[j] - str2[j];
 
 		if (i != 0)
 		{
-			return (i);
+			return i;
 		}
+
+		j++;
 	}
 	return (0);
 }

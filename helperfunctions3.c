@@ -48,7 +48,7 @@ char *path_var(char **env)
 
 	if (env[i] == NULL)
 	{
-		return NULL;
+		return (NULL);
 	}
 
 	count = 5;
