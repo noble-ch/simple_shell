@@ -1,79 +1,49 @@
 #include "main.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
-#include <sys/types.h>
-
-void process_input(FILE *stream);
-
 /**
- * main - Entry point for the shell program
- * @argc: The number of command line arguments
- * @argv: An array of command-line strings.
- *
- * Description: The main function of the shell program. It reads
- * commands from either a file or standard input, processes the
- * commands, and executes them. If a file name is provided as a
- * command-line argument, the program reads commands from the file;
- * otherwise, it reads commands from standard input.
- *
- * Return: Always returns 0 to indicate successful execution/
+ * main - main  functions
+ * @arg_c: argument numbers
+ * @args: argument value
+ * @env: environment
+ * Return: 0.
  */
-
-int main(int argc, char *argv[])
+int main(int arg_c, char **args, char **env)
 {
-	if (argc > 2)
-	{
-		fprintf(stderr, "Usage: %s [filename]\n", argv[0]);
-		exit(EXIT_FAILURE);
-	}
-	if (argc == 2)
-	{
-		FILE *file;
-
-		file = fopen(argv[1], "r");
-		if (file == NULL)
-		{
-			perror("Error opening file");
-			exit(EXIT_FAILURE);
-		}
-		process_input(file);
-		fclose(file);
-	}
-	else
-	{
-		process_input(stdin);
-	}
-
-	return (0);
-}
-
-/**
- * process_input - Process user input from a specified stream
- * @stream: The input stream
- */
-
-void process_input(FILE *stream)
-{
-	char *command;
-	size_t bufsize;
-
-	command = NULL;
-	bufsize = BUFFER_SIZE;
+	char *getcommand = NULL, **user_input = NULL;
+	int pathValue = 0, terminate = 0, n = 0;
+	(void)arg_c;
 
 	while (1)
 	{
-		display_prompt();
-
-		if (custom_getline(&command, &bufsize, stream) == -1)
+		getcommand = getline_function();
+		if (getcommand)
 		{
-			printf("\n");
-			break;
+			pathValue++;
+			user_input = get_token(getcommand);
+			if (!user_input)
+			{
+				free(getcommand);
+				continue;
+			}
+			if ((!comp_strval(user_input[0], "exit")) && user_input[1] == NULL)
+				built_in_exit(user_input, getcommand, terminate);
+			if (!comp_strval(user_input[0], "env"))
+				get_enviroment(env);
+			else
+			{
+				n = values_path(&user_input[0], env);
+				terminate = fork_f(user_input, args, env, getcommand, pathValue, n);
+				if (n == 0)
+					free(user_input[0]);
+			}
+			free(user_input);
 		}
-
-		if (strlen(command) > 0)
-			handle_commands(command);
+		else
+		{
+			if (isatty(STDIN_FILENO))
+				write(STDOUT_FILENO, "\n", 1);
+			exit(terminate);
+		}
+		free(getcommand);
 	}
-	free(command);
+	return (terminate);
 }

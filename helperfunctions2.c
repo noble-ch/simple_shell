@@ -1,132 +1,110 @@
 #include "main.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-
 /**
- * print_environment - Prints the environment variables
- */
-void print_environment(void)
-{
-char **env = environ;
-
-while (*env != NULL)
-{
-printf("%s\n", *env);
-env++;
-}
-}
-
-/**
- * check_command_existence - Checks if a command exists in the PATH
- * @command: The command to check
+ *concat - copy string value in concat
+ *@destination: character value
+ *@source: chararcter value
+ *Return: destination
  *
- * Return: 1 if the command exists, 0 otherwise
  */
-int check_command_existence(char *command)
-{
-char *path;
-int command_found = 0;
-char *path_copy;
-char exec_path[PATH_MAX_LEN];
-char *path_var = getenv("PATH");
-	if (path_var == NULL)
-	{
-	fprintf(stderr, "Error: PATH environment not found\n");
-	return (0);
-	}
-	path_copy = strdup(path_var);
-	if (path_copy == NULL)
-	{
-	fprintf(stderr, "Error: Memory allocation failed\n");
-	return (0);
-	}
-	path = strtok(path_copy, ":");
-	while (path != NULL)
-	{
-	snprintf(exec_path, sizeof(exec_path), "%s/%s", path, command);
 
-	if (access(exec_path, X_OK) == 0)
+char *concat(char *destination, char *source)
+{
+	int dest = 0;
+	int src = 0;
+
+	while (destination[dest] != '\0')
 	{
-	printf("Executable found at: %s\n", exec_path);
-	command_found = 1;
-	break;
+		dest++;
 	}
-	path = strtok(NULL, ":");
+	while (source[src] != '\0')
+	{
+		destination[dest] = source[src];
+		dest++;
+		src++;
 	}
-	free(path_copy);
-	return (command_found);
+	destination[dest] = '\0';
+	return (destination);
 }
 
 /**
- * custom_getline - Custom implementation of getline for file input
- * @lineptr: Pointer to the buffer containing the line
- * @n: Pointer to the size of the buffer
- * @stream: The input stream (file)
+ * comp_strval - compare the values of a string
+ * @str1: string char first
+ * @str2: strinng char second
+ * Return: 0
+ */
+
+int comp_strval(char *str1, char *str2)
+{
+	int a;
+
+	for (a = 0; str1[a] != '\0' && str2[a] != '\0'; a++)
+	{
+		if (str1[a] != str2[a])
+			return ((int)str1[a] - str2[a]);
+	}
+	return (0);
+}
+
+/**
+ * string_len - copies the string pointed to by source into destination
+ * @s: A pointer
+ * Return: char pointer to destination
+ */
+
+int string_len(char *s)
+{
+	int ch = 0;
+
+	while (*(s + ch) != '\0')
+	{
+		ch++;
+	}
+
+	return (ch);
+}
+
+/**
+ *comp_string -  function that compares two strings.
+ *@str1: string one
+ *@str2: string two
+ *@n: number of characters
+ * Return: diference
+ */
+
+size_t comp_string(char *str1, char *str2, size_t n)
+{
+	size_t i, j;
+
+	for (j = 0; str1[j] != '\0' && j < n; j++)
+	{
+		i = str1[j] - str2[j];
+
+		if (i != 0)
+		{
+			return (i);
+		}
+	}
+	return (0);
+}
+
+/**
+ * string_copy - copies the string pointed to by source into destination
+ * @destination: destination of the copy
+ * @source: source of the copy
  *
- * Return: The number of characters read, or -1 on failure
+ * Return: char pointer to destination
  */
-ssize_t custom_getline(char **lineptr, size_t *n, FILE *stream)
-{
-size_t bufsize = 0;
-int c;
-char *new_ptr;
-ssize_t len = 0;
-	if (lineptr == NULL || n == NULL)
-	return (-1);
-	if (*lineptr == NULL)
-	{
-	bufsize = 128;
-	*lineptr = (char *)malloc(bufsize * sizeof(char));
-	if (*lineptr == NULL)
-	return (-1);
-	*n = bufsize;
-	}
-	while ((c = fgetc(stream)) != EOF && c != '\n')
-	{
-	if ((size_t)(len + 1) >= *n)
-	{
-	bufsize *= 2;
-	new_ptr = (char *)realloc(*lineptr, bufsize);
-	if (new_ptr == NULL)
-	return (-1);
-	*lineptr = new_ptr;
-	*n = bufsize;
-	}
-	(*lineptr)[len++] = c;
-	}
-	if (c == EOF && len == 0)
-	return (len);
 
-	(*lineptr)[len] = '\0';
-	return (len);
-}
-
-/**
- * change_directory - Changes the current working directory
- * @new_directory: The new directory path
- */
-void change_directory(const char *new_directory)
+char *string_copy(char *destination, char *source)
 {
-char current_directory[BUFFER_SIZE];
-	if (getcwd(current_directory, sizeof(current_directory)) == NULL)
+	int i = 0;
+
+	while (*(source + i) != '\0')
 	{
-	perror("getcwd() error");
+		*(destination + i) = *(source + i);
+		++i;
 	}
-	else
-	{
-	if (new_directory == NULL || strlen(new_directory) == 0)
-	{
-	new_directory = getenv("HOME");
-	}
-	if (chdir(new_directory) == 0)
-	{
-	setenv("PWD", new_directory, 1);
-	}
-	else
-	{
-	perror("chdir() error");
-	}
-	}
+	*(destination + i) = *(source + i);
+
+	return (destination);
 }
