@@ -10,11 +10,15 @@ void built_in_exit(char **args, char *line_pointer, int terminate)
 {
 	int stat = 0;
 
-	if (!args[1])
+	switch (!args[1])
 	{
-	free(line_pointer);
-	free(args);
-	exit(terminate);
+	case 1:
+		free(line_pointer);
+		free(args);
+		exit(terminate);
+		break;
+	default:
+		break;
 	}
 	stat = atoi(args[1]);
 
