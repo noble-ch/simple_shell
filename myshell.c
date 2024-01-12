@@ -14,7 +14,7 @@ int main(int arg_c, char **args, char **env)
 
 	while (1)
 	{
-		getcommand = custom_getline();
+		getcommand = getline_function();
 		if (getcommand)
 		{
 			pathValue++;
