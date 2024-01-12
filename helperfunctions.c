@@ -10,21 +10,19 @@ void built_in_exit(char **args, char *line_pointer, int terminate)
 {
 	int stat = 0;
 
-	if (args[1] != NULL)
+	if (!args[1])
 	{
-		stat = atoi(args[1]);
-
-		if (stat == 0 && args[1][0] != '0')
-		{
-			fprintf(stderr, "Invalid argument for exit: %s\n", args[1]);
-			return;
-		}
+	free(line_pointer);
+	free(args);
+	exit(terminate);
 	}
+	stat = atoi(args[1]);
 
 	free(line_pointer);
 	free(args);
 	exit(stat);
 }
+
 /**
  * get_token - function that gets string token
  * @line_pointer: user input(command)
