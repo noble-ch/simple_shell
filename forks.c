@@ -13,7 +13,7 @@
 int fork_f(char **arg, char **PID, char **env, char *lineptr, int n, int c)
 {
 	pid_t child;
-	int status;
+	int stat;
 	char *format = "%s: %d: %s: not found\n";
 
 	child = fork();
@@ -32,10 +32,10 @@ int fork_f(char **arg, char **PID, char **env, char *lineptr, int n, int c)
 	}
 	else
 	{
-		wait(&status);
+		wait(&stat);
 
-		if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
-			return (WEXITSTATUS(status));
+		if (WIFEXITED(stat) && WEXITstat(stat) != 0)
+			return (WEXITstat(stat));
 	}
 	return (0);
 }
