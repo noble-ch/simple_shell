@@ -1,6 +1,8 @@
 #ifndef MAIN_H
 #define MAIN_H
 #define _GNU_SOURCE
+#define BUFFER_SIZE 1024
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,13 +15,14 @@
 
 extern char **environ;
 
+
 int comp_strval(char *str1, char *str2);
 size_t comp_string(char *str1, char *str2, size_t n);
 int string_len(char *s);
 char *string_copy(char *destination, char *source);
 char *concat(char *destnation, char *source);
 int _putchar(char c);
-
+char *custom_getline();
 char *path_var(char **env);
 int values_path(char **arg, char **env);
 char *getline_function(void);
