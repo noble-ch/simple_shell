@@ -34,8 +34,9 @@ int fork_f(char **arg, char **PID, char **env, char *lineptr, int n, int c)
 	{
 		wait(&status);
 
-		if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
-			return (WEXITSTATUS(status));
+		return ((WIFEXITED(status) && WEXITSTATUS(status) != 0) ?
+				WEXITSTATUS(status) : 0);
+
 	}
 	return (0);
 }
