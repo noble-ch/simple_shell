@@ -18,7 +18,6 @@ void built_in_exit(char **args, char *line_pointer, int terminate)
 		exit(terminate);
 		break;
 	default:
-		
 		break;
 	}
 	stat = atoi(args[1]);
