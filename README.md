@@ -23,7 +23,7 @@ This project represents a milestone in the C code curriculum at ALX Africa Softw
 </p>
 
 ## COPYRIGHT
-Copyright (C) 2024 by [**Noble Biru**](https://github.com/noble-ch) and [**brian Wagura**](https://github.com/brian-wagura) </br>
+Copyright (C) 2024 by [**Noble Biru**](https://github.com/noble-ch) and [**Brian Wagura**](https://github.com/brian-wagura) </br>
 All rights reserved
 
  ## Description :
@@ -83,7 +83,7 @@ ls -la
 
 ## Contributors :
 * [**noble biru**](https://github.com/noble-ch)
-* [**brian biru**](https://github.com/brian-wagura)
+* [**Brian Wagura**](https://github.com/brian-wagura)
 
 ## Acknowledgments :
 - The creators of the C language.
